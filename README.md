@@ -1,3 +1,203 @@
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Scanner;
+
+public class Ggame {
+    private static final String[] monsterNames = {"十", "百", "千", "万", "十万", "亿"};
+    private static int flag = 0;
+    private static int reLife = 3;
+    private static int award = 0;
+
+    public static void sleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("欢迎来到《Ggame》\n");
+        Player player = createPlayer();
+        System.out.println("欢迎来到虚拟世界");
+        while (player.getHP() > 0) {
+            sleep(300);
+            ArrayList<Monster> monsters = new ArrayList<>();
+            int i;
+            int monsterNum = (int) (Math.random() * 3 + 1);
+            for (i = 0; i < monsterNum; i++) {
+                monsters.add(createMonster());
+            }
+            System.out.println("新的怪物，【" + player.getName() + "】，快去挑战他们！");
+            sleep(300);
+            for (i = 0; i < monsterNum; i++) {
+                System.out.println((i + 1) + ".【注意】您遇见了带有【" + monsters.get(i).getEquip() + "】的" + monsters.get(i).getName());
+            }
+            while (flag == 0) {
+                player.show();
+                for (i = 0; i < monsterNum; i++) {
+                    monsters.get(i).show();
+                }
+                sleep(300);
+                
+                int attackedMon = (int) (Math.random() * monsterNum);
+               
+                player.attack(player, monsters.get(attackedMon));
+                sleep(300);
+               
+                for (i = 0; i < monsterNum; i++) {
+                    if (monsters.get(i).getHP() > 0) {
+                        monsters.get(i).attack(player, monsters.get(i));
+                        if(player.getHP()<=0) break;
+                    } else {
+                        award += 1;
+                        System.out.println("【" + monsters.get(i).getName() + "】已战死。");
+                        monsters.remove(i);
+                        if (monsterNum > 0) monsterNum -= 1;
+                    }
+                }
+               
+                if (monsterNum == 0) {
+                    flag = 1;
+                    System.out.println("【" + player.getName() + "】获得了胜利！");
+                    break;
+                }
+                if (player.getHP() <= 0) {
+                    flag = 2;
+                    System.out.println(monsters.get(i).getName() + "获得了胜利！");
+                    break;
+                }
+                sleep(200);
+            }
+            if (reLife > 0 && player.getHP() <= 0) {
+                player.setHP(player.getHPMax());
+                player.setDefine(player.getDefine() + 10);
+                reLife -= 1;
+                System.out.println("【复活甲】你已复活一次，剩余复活次数：" + reLife);
+            } else if (reLife <= 0 && player.getHP() <= 0) {
+                System.out.println("少年，你已战败......");
+                break;
+            }
+            flag = 0;
+            sleep(500);
+        }
+        System.out.println("您共计打败【" + award + "】只怪物！！！");
+    }
+
+    
+    private static Player createPlayer() {
+        System.out.println("请先创建玩家角色：\n");
+        Scanner sc = new Scanner(System.in);
+        System.out.println("您的玩家名称为：");
+        String name = sc.nextLine();
+       
+        System.out.println("\n您的生命值：");
+        int bloodInit;
+        while (!sc.hasNextInt()) {
+            System.out.println("请输入合理的血量值...");
+            sc = new Scanner(System.in);
+        }
+        bloodInit = sc.nextInt();
+        while (bloodInit > 9999 || bloodInit < 0) {
+            System.out.println("请输入合理的血量值...");
+            bloodInit = sc.nextInt();
+        }
+       
+        System.out.println("\n您的攻击力：");
+        int attack;
+        while (!sc.hasNextInt()) {
+            System.out.println("请输入合理的攻击值...");
+            sc = new Scanner(System.in);
+        }
+        attack = sc.nextInt();
+        while (attack > 999 || attack < 0) {
+            System.out.println("请输入合理的攻击值...");
+            attack = sc.nextInt();
+        }
+        System.out.println("\n您的防御力：");
+        int define;
+        while (!sc.hasNextInt()) {
+            System.out.println("请输入合理的防御值...");
+            sc = new Scanner(System.in);
+        }
+        define = sc.nextInt();
+        while (define > 999 || define < 0) {
+            System.out.println("请输入合理的防御值...");
+            define = sc.nextInt();
+        }
+       
+        return new Player(name, bloodInit, attack, define);
+    }
+
+   
+    private static Monster createMonster() {
+        return new Monster(monsterNames[(int) (Math.random() * monsterNames.length)],
+                (int) (Math.random() * 60) + 60,
+                (int) (Math.random() * 10) + 1,
+                (int) (Math.random() * 19 + 1),
+                (int) (Math.random() * 5));
+    }
+
+
+}
+
+public class Character {
+    String name;
+    int HP;
+    int HPMax;
+    int attack;
+    int define;
+    String equip;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getHP() {
+        return HP;
+    }
+
+    public void setHP(int HP) {
+        this.HP = HP;
+    }
+
+    public int getHPMax() {
+        return HPMax;
+    }
+
+    public void setHPMax(int HPMax) {
+        this.HPMax = HPMax;
+    }
+
+    public int getAttack() {
+        return attack;
+    }
+
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
+
+    public int getDefine() {
+        return define;
+    }
+
+    public void setDefine(int define) {
+        this.define = define;
+    }
+
+    public String getEquip() {
+        return equip;
+    }
+
+    public void setEquip(String equip) {
+        this.equip = equip;
+    }
+}
+
 interface AttackJudge {
     static final double bloodGrid = 25.0;
     String[] skill_player = {"江南", "缠绵", "止水", "碧影", "蝶舞","A"};
